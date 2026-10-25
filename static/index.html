@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Laya Decision Lab</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/static/app.css"><script src="/static/app.js" defer></script></head>
+<body>
+<header><a class="brand" href="/" aria-label="Laya Decision Lab home"><span class="brand-icon">L<span>•</span></span><span>Laya <b>Decision Lab</b></span></a><div class="header-actions"><span class="local-pill"><i></i> LOCAL INFERENCE</span><button id="present" class="quiet">⛶ Present</button></div></header>
+<main>
+<section class="intro"><div><p class="eyebrow">FROM TEXT TO A TYPED DECISION</p><h1>One ticket. Three decisions.</h1><p class="subtitle">See how Laya reads a request, scores the signals and proposes the next step.</p></div><div class="machine"><span id="state-dot" class="dot"></span><span id="machine-state">Connecting to local model…</span><small id="machine-detail">Laya runs on this Mac</small></div></section>
+<nav aria-label="Demo sections"><button class="tab active" data-panel="live" aria-current="page">01 <span>Live demo</span></button><button class="tab" data-panel="evaluation">02 <span>Evaluate samples</span></button><button class="tab" data-panel="schema">03 <span>Decision schema</span></button></nav>
+<div id="error" role="alert" hidden></div>
+<section id="live" class="panel">
+<div class="workspace">
+<article class="card input-card"><div class="card-heading"><div><span class="eyebrow">INPUT</span><h2>The support ticket</h2></div><span class="type-tag">text</span></div>
+<label for="sample">Start with an example</label><select id="sample"><option value="">Write your own ticket</option></select>
+<label for="ticket" class="sr-only">Ticket text</label><textarea id="ticket" maxlength="2000" spellcheck="false" placeholder="Paste a support ticket here…"></textarea><div class="input-meta"><span>Processed locally · not stored</span><span id="characters">0 / 2,000</span></div>
+<div class="settings"><div><label for="model">Checkpoint</label><select id="model"><option value="typed-decisions">English / typed decisions</option><option value="multilingual">Multilingual / português</option></select></div><div><label for="threshold">Review threshold <output id="threshold-value">80%</output></label><input type="range" id="threshold" min="0" max="100" value="80" aria-label="Review confidence threshold"></div></div>
+<button id="analyze" class="primary" disabled><span>Analyze ticket</span><span aria-hidden="true">↗</span></button><p id="run-state" class="run-state" role="status">Preparing the model. The first download can take a few minutes.</p>
+</article>
+<article class="card output-card"><div class="card-heading"><div><span class="eyebrow">OUTPUT</span><h2>A structured answer</h2></div><span id="timing" class="time-pill">Ready when you are</span></div>
+<div id="empty-result"><div class="empty-glyph"><span>01</span><b>→</b><span>02</span><b>→</b><span>03</span></div><h3>Read. Decide. Route.</h3><p>Analyze a ticket to see real model outputs.<br>No generated response. No preset answers.</p><div class="primitive-chips"><span>choice</span><span>score</span><span>noul</span></div></div>
+<div id="result" hidden>
+<div class="decision"><div><span class="decision-label">Department</span><span class="type-tag">choice</span></div><strong id="department">—</strong><div id="department-bars" class="distribution"></div></div>
+<div class="decision"><div><span class="decision-label">Urgency</span><span class="type-tag">score</span></div><div class="value-line"><strong id="urgency">—</strong><small id="urgency-score"></small></div><div id="urgency-bars" class="urgency-scale"></div></div>
+<div class="decision"><div><span class="decision-label">Cancellation signal</span><span class="type-tag">noul</span></div><div class="value-line"><strong id="churn">—</strong><small>P(yes), model estimate</small></div><div class="track"><span id="churn-bar"></span></div></div>
+<div id="policy" class="policy"><span class="eyebrow">POLICY OUTCOME · DEMONSTRATION ONLY</span><h3 id="policy-outcome"></h3><p id="policy-reason"></p><small id="confidence"></small></div>
+<div class="result-actions"><span id="receipt"></span><button id="export" class="quiet">↓ Export JSON</button></div>
+</div>
+</article></div>
+<div class="explanation"><span class="explanation-icon">i</span><p><strong>Model output ≠ an executed action.</strong> The threshold is illustrative, not calibrated on these tickets. Every route is a proposal; this demo never refunds, cancels or contacts a customer.</p></div>
+</section>
+<section id="evaluation" class="panel" hidden>
+<div class="section-title"><div><p class="eyebrow">CHECK THE TRADE-OFFS</p><h2>Make the errors visible.</h2><p>Run eight labelled demonstration tickets. Compare department routing with simple keyword rules.</p></div><button id="evaluate" class="primary compact" disabled>Run 8 samples ↗</button></div>
+<div class="evaluation-note">These are visible, synthetic examples, not a held-out benchmark. English uses the typed-decisions checkpoint; Portuguese uses multilingual. Timings include tokenization and inference, but exclude model loading and HTTP.</div>
+<p id="evaluation-progress" role="status"></p><div id="metrics" class="metrics"></div>
+<div class="table-wrap"><table><thead><tr><th>Ticket</th><th>Expected team</th><th>Laya</th><th>Rules</th><th>Inference</th><th>Policy</th></tr></thead><tbody id="evaluation-rows"></tbody></table></div>
+<button id="export-evaluation" class="quiet" disabled>↓ Export evaluation</button>
+</section>
+<section id="schema" class="panel" hidden>
+<div class="section-title"><div><p class="eyebrow">THE DECISION CONTRACT</p><h2>Explicit questions. Typed outputs.</h2><p>The same schema is sent for every ticket. The expected sample answers are never sent to Laya.</p></div></div>
+<div class="schema-layout"><div class="card schema-guide"><h3>Three questions, one model call</h3><dl><dt>choice → department</dt><dd>A label from Billing, Technical, Sales or Other, with its probability distribution.</dd><dt>score → urgency</dt><dd>An expected ordinal value from 0 to 2. The displayed level is the most likely level, not the rounded average.</dd><dt>noul → cancellation</dt><dd>The model's estimated probability that the customer expresses intent to cancel.</dd></dl><h3>Our review policy</h3><p>Suggest human review if any confidence is below the slider threshold, cancellation probability is at least 50%, or expected urgency is at least 1.5.</p><p class="muted">Confidence is a separate model output. It is not measured accuracy. This PoC does not fit temperatures or validate a production threshold.</p><a href="https://github.com/NandhaKishorM/laya" target="_blank" rel="noreferrer">Laya source and documented limits ↗</a></div><pre id="schema-code" class="card"></pre></div>
+</section>
+<footer><span>LAYA DECISION LAB <b> / </b> PRESENTATION COMPANION</span><span id="version">Real local inference · no cloud API</span></footer>
+</main>
+</body></html>

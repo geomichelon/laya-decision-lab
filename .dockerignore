@@ -1,0 +1,8 @@
+*
+!requirements.lock.txt
+!app.py
+!domain.py
+!questions.json
+!samples.json
+!static/
+!static/**

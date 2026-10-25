@@ -1,0 +1,10 @@
+[
+ {"id":"duplicate","title":"Duplicate charge","language":"en","text":"I was charged twice for March. Please refund the duplicate payment today, or I will cancel my subscription.","expected":{"department":"billing","urgency":2,"churn_risk":true}},
+ {"id":"outage","title":"Production outage","language":"en","text":"All users get an error when signing in. Our team cannot work and we need the service restored immediately.","expected":{"department":"technical","urgency":2,"churn_risk":false}},
+ {"id":"pricing","title":"A future purchase","language":"en","text":"Could you send me the pricing for a team of 20 and a comparison of your plans? We are evaluating options for next quarter; there is no rush.","expected":{"department":"sales","urgency":0,"churn_risk":false}},
+ {"id":"negation","title":"The negation test","language":"en","text":"I do not want to cancel my subscription. I only need a copy of last month's invoice for our records. There is no rush.","expected":{"department":"billing","urgency":0,"churn_risk":false}},
+ {"id":"feedback","title":"A small suggestion","language":"en","text":"I love the product. Just a suggestion for the future: a darker theme would be nice. Nothing is broken and no action is needed now.","expected":{"department":"other","urgency":0,"churn_risk":false}},
+ {"id":"cancel","title":"Leaving the service","language":"en","text":"Please cancel my subscription before it renews today. I have decided to leave and use another provider.","expected":{"department":"billing","urgency":2,"churn_risk":true}},
+ {"id":"pt-billing","title":"Cobrança duplicada","language":"pt","text":"Fui cobrado duas vezes neste mês. Preciso do estorno hoje ou vou cancelar minha assinatura.","expected":{"department":"billing","urgency":2,"churn_risk":true}},
+ {"id":"pt-pricing","title":"Uma nova equipe","language":"pt","text":"Gostaria de conhecer os preços dos planos para uma equipe de vinte pessoas. Estamos planejando a compra para o próximo trimestre, sem urgência.","expected":{"department":"sales","urgency":0,"churn_risk":false}}
+]

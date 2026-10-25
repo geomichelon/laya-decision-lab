@@ -1,0 +1,29 @@
+{
+  "department": {
+    "type": "choice",
+    "instructions": "Which support department should handle the customer's main request?",
+    "criteria": {
+      "billing": "Invoices, charges, refunds, subscriptions or payment problems.",
+      "technical": "Software bugs, outages, login failures or features that do not work.",
+      "sales": "Pre-purchase questions, pricing, plan comparisons or product demonstrations.",
+      "other": "Feedback, general questions or requests outside billing, technical support and sales."
+    }
+  },
+  "urgency": {
+    "type": "score",
+    "instructions": "How urgent is the customer's request based on the impact and timing explicitly stated?",
+    "criteria": [
+      "Low: informational, routine or explicitly not time-sensitive; nothing is blocked.",
+      "Medium: a problem needs attention soon, but there is no immediate deadline or blocked operation.",
+      "High: an active outage, blocked work, an immediate deadline or a demand for action today."
+    ]
+  },
+  "churn_risk": {
+    "type": "noul",
+    "instructions": "Does the customer express an intention or threat to cancel their subscription or leave the service?",
+    "criteria": {
+      "false": "The customer does not intend or threaten to cancel or leave; this includes explicitly saying they do not want to cancel.",
+      "true": "The customer explicitly requests cancellation or threatens to cancel their subscription or leave the service."
+    }
+  }
+}

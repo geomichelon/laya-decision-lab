@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-25",
+  "HF_HUB_OFFLINE": true,
+  "TRANSFORMERS_OFFLINE": true,
+  "models": [
+    "typed-decisions",
+    "multilingual"
+  ],
+  "completedSamples": 8,
+  "failedSamples": 0,
+  "browserChecksPassed": true,
+  "metrics": {
+    "completed": 8,
+    "failed": 0,
+    "department_accuracy": 0.875,
+    "rules_accuracy": 1,
+    "churn_accuracy": 0.75,
+    "urgency_mae": 0.569375,
+    "p50_ms": 114.14,
+    "p95_ms": 142.69,
+    "review_rate": 1
+  }
+}
