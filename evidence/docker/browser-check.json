@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "realInference": true,
+  "viewports": [
+    1440,
+    390
+  ],
+  "checks": [
+    "real ticket",
+    "JSON export",
+    "stale result invalidation",
+    "schema",
+    "8-sample evaluation",
+    "Portuguese",
+    "mobile overflow",
+    "empty input"
+  ],
+  "errors": []
+}

@@ -1,0 +1,173 @@
+{
+  "passed": true,
+  "torch": "2.14.1+cpu",
+  "results": [
+    {
+      "sample": "duplicate",
+      "result": {
+        "answers": {
+          "department": {
+            "type": "choice",
+            "choice": "billing",
+            "probabilities": {
+              "billing": 0.8062,
+              "technical": 0.0583,
+              "sales": 0.0532,
+              "other": 0.0824
+            },
+            "confidence": 0.4943,
+            "answer_confidence": 0.8062,
+            "action": {
+              "act_probability": 1.0
+            }
+          },
+          "urgency": {
+            "type": "score",
+            "score": 1.7834,
+            "legend": {
+              "0": "Low: informational, routine or explicitly not time-sensitive; nothing is blocked.",
+              "1": "Medium: a problem needs attention soon, but there is no immediate deadline or blocked operation.",
+              "2": "High: an active outage, blocked work, an immediate deadline or a demand for action today."
+            },
+            "probabilities": {
+              "0": 0.0386,
+              "1": 0.1395,
+              "2": 0.8219
+            },
+            "confidence": 0.4889,
+            "answer_confidence": 0.8219,
+            "action": {
+              "act_probability": 1.0
+            }
+          },
+          "churn_risk": {
+            "type": "noul",
+            "noul": 0.7203,
+            "confidence": 0.7203,
+            "answer_confidence": 0.7203,
+            "action": {
+              "act_probability": 1.0
+            }
+          }
+        },
+        "policy": {
+          "outcome": "human_review",
+          "reasons": [
+            "Model confidence is below the review threshold.",
+            "The model flags an intention to cancel.",
+            "The model flags a high-urgency request."
+          ],
+          "minimum_confidence": 0.4889,
+          "threshold": 0.8,
+          "department": "billing",
+          "executes_actions": false
+        },
+        "baseline": {
+          "department": "billing",
+          "elapsed_ms": 0.303,
+          "method": "Ordered keyword rules: billing, technical, sales, other. No semantic inference."
+        },
+        "inference_ms": 1534.61,
+        "total_ms": 5805.51,
+        "loaded_this_request": true,
+        "model": "typed-decisions",
+        "model_revision": "55cf4c4ebb4ebe31b2550e8bdf3bd21b99753851",
+        "device": "cpu",
+        "cpu_fallback_count": 0,
+        "usage": {
+          "input_tokens": 311,
+          "output_tokens": 0,
+          "state_tokens": 21,
+          "state_tokens_dropped": 0,
+          "truncated": false,
+          "truncated_questions": []
+        },
+        "mode": "real_local_inference",
+        "calibration": "Not calibrated on these demonstration tickets."
+      }
+    },
+    {
+      "sample": "pt-billing",
+      "result": {
+        "answers": {
+          "department": {
+            "type": "choice",
+            "choice": "billing",
+            "probabilities": {
+              "billing": 0.9873,
+              "technical": 0.0056,
+              "sales": 0.0052,
+              "other": 0.0019
+            },
+            "confidence": 0.9417,
+            "answer_confidence": 0.9873,
+            "action": {
+              "act_probability": 1.0
+            }
+          },
+          "urgency": {
+            "type": "score",
+            "score": 0.9991,
+            "legend": {
+              "0": "Low: informational, routine or explicitly not time-sensitive; nothing is blocked.",
+              "1": "Medium: a problem needs attention soon, but there is no immediate deadline or blocked operation.",
+              "2": "High: an active outage, blocked work, an immediate deadline or a demand for action today."
+            },
+            "probabilities": {
+              "0": 0.2533,
+              "1": 0.4943,
+              "2": 0.2524
+            },
+            "confidence": 0.0501,
+            "answer_confidence": 0.4943,
+            "action": {
+              "act_probability": 1.0
+            }
+          },
+          "churn_risk": {
+            "type": "noul",
+            "noul": 0.899,
+            "confidence": 0.899,
+            "answer_confidence": 0.899,
+            "action": {
+              "act_probability": 1.0
+            }
+          }
+        },
+        "policy": {
+          "outcome": "human_review",
+          "reasons": [
+            "Model confidence is below the review threshold.",
+            "The model flags an intention to cancel."
+          ],
+          "minimum_confidence": 0.0501,
+          "threshold": 0.8,
+          "department": "billing",
+          "executes_actions": false
+        },
+        "baseline": {
+          "department": "billing",
+          "elapsed_ms": 0.068,
+          "method": "Ordered keyword rules: billing, technical, sales, other. No semantic inference."
+        },
+        "inference_ms": 713.52,
+        "total_ms": 5675.3,
+        "loaded_this_request": true,
+        "model": "multilingual",
+        "model_revision": "55cf4c4ebb4ebe31b2550e8bdf3bd21b99753851",
+        "device": "cpu",
+        "cpu_fallback_count": 0,
+        "usage": {
+          "input_tokens": 309,
+          "output_tokens": 0,
+          "state_tokens": 21,
+          "state_tokens_dropped": 0,
+          "truncated": false,
+          "truncated_questions": []
+        },
+        "mode": "real_local_inference",
+        "calibration": "Not calibrated on these demonstration tickets."
+      }
+    }
+  ]
+}

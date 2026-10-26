@@ -1,0 +1,153 @@
+{
+  "date": "2026-10-25",
+  "platform": "Docker Desktop on Apple Silicon, linux/arm64",
+  "docker_engine": "28.2.2",
+  "docker_desktop": "4.42.1",
+  "compose": "2.37.1",
+  "resources": {
+    "cpus": 8,
+    "memory_bytes": 8218316800
+  },
+  "image": "sha256:581af70f7ceb4b6b61292fe710496a26e57f20eb848d27fadc3b9e98e1bcbb00",
+  "image_size_bytes": 1170862837,
+  "torch": "2.14.1+cpu",
+  "cuda": null,
+  "fresh_model_volume": true,
+  "initial_english_download_and_load_ms": 32699.3,
+  "python_tests_passed": 3,
+  "browser": {
+    "passed": true,
+    "realInference": true,
+    "viewports": [
+      1440,
+      390
+    ],
+    "checks": [
+      "real ticket",
+      "JSON export",
+      "stale result invalidation",
+      "schema",
+      "8-sample evaluation",
+      "Portuguese",
+      "mobile overflow",
+      "empty input"
+    ],
+    "errors": []
+  },
+  "metrics": {
+    "completed": 8,
+    "failed": 0,
+    "department_accuracy": 0.875,
+    "rules_accuracy": 1,
+    "churn_accuracy": 0.75,
+    "urgency_mae": 0.569375,
+    "p50_ms": 1231.49,
+    "p95_ms": 1391.98,
+    "review_rate": 1
+  },
+  "offline_network_none": {
+    "passed": true,
+    "checkpoints": [
+      "typed-decisions",
+      "multilingual"
+    ],
+    "evidence": "offline-result.json"
+  },
+  "compose_offline_recreation": {
+    "healthy": true,
+    "status": {
+      "state": "ready",
+      "error": null,
+      "model": "typed-decisions",
+      "device": "cpu",
+      "load_ms": 4550.6,
+      "version": "0.4.15"
+    },
+    "inference": {
+      "answers": {
+        "department": {
+          "type": "choice",
+          "choice": "billing",
+          "probabilities": {
+            "billing": 0.8062,
+            "technical": 0.0583,
+            "sales": 0.0532,
+            "other": 0.0824
+          },
+          "confidence": 0.4943,
+          "answer_confidence": 0.8062,
+          "action": {
+            "act_probability": 1.0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 1.7834,
+          "legend": {
+            "0": "Low: informational, routine or explicitly not time-sensitive; nothing is blocked.",
+            "1": "Medium: a problem needs attention soon, but there is no immediate deadline or blocked operation.",
+            "2": "High: an active outage, blocked work, an immediate deadline or a demand for action today."
+          },
+          "probabilities": {
+            "0": 0.0386,
+            "1": 0.1395,
+            "2": 0.8219
+          },
+          "confidence": 0.4889,
+          "answer_confidence": 0.8219,
+          "action": {
+            "act_probability": 1.0
+          }
+        },
+        "churn_risk": {
+          "type": "noul",
+          "noul": 0.7203,
+          "confidence": 0.7203,
+          "answer_confidence": 0.7203,
+          "action": {
+            "act_probability": 1.0
+          }
+        }
+      },
+      "policy": {
+        "outcome": "human_review",
+        "reasons": [
+          "Model confidence is below the review threshold.",
+          "The model flags an intention to cancel.",
+          "The model flags a high-urgency request."
+        ],
+        "minimum_confidence": 0.4889,
+        "threshold": 0.8,
+        "department": "billing",
+        "executes_actions": false
+      },
+      "baseline": {
+        "department": "billing",
+        "elapsed_ms": 0.505,
+        "method": "Ordered keyword rules: billing, technical, sales, other. No semantic inference."
+      },
+      "inference_ms": 1899.19,
+      "total_ms": 1903.38,
+      "loaded_this_request": false,
+      "model": "typed-decisions",
+      "model_revision": "55cf4c4ebb4ebe31b2550e8bdf3bd21b99753851",
+      "device": "cpu",
+      "cpu_fallback_count": 0,
+      "usage": {
+        "input_tokens": 311,
+        "output_tokens": 0,
+        "state_tokens": 21,
+        "state_tokens_dropped": 0,
+        "truncated": false,
+        "truncated_questions": []
+      },
+      "mode": "real_local_inference",
+      "calibration": "Not calibrated on these demonstration tickets."
+    }
+  },
+  "limitations": [
+    "Validated on linux/arm64 only; x86_64 and Windows not tested.",
+    "Eight visible synthetic samples, not a held-out benchmark.",
+    "Docker uses CPU; native Metal measurements are recorded separately."
+  ]
+}

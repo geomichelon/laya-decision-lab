@@ -1,9 +1,9 @@
 const {chromium,expect}=require('@playwright/test');const fs=require('fs');
 (async()=>{
- const out=require('path').resolve(__dirname,'../evidence');
+ const out=require('path').resolve(process.env.EVIDENCE_DIR || require('path').join(__dirname,'../evidence'));fs.mkdirSync(out,{recursive:true});
  const browser=await chromium.launch();const page=await browser.newPage({viewport:{width:1440,height:1080}});const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  try{
- await page.goto('http://127.0.0.1:8765/');await expect(page.getByRole('button',{name:'Analyze ticket'})).toBeEnabled({timeout:120000});
+ await page.goto(process.env.BASE_URL || 'http://127.0.0.1:8765/');await expect(page.getByRole('button',{name:'Analyze ticket'})).toBeEnabled({timeout:120000});
  await page.getByRole('button',{name:'Analyze ticket'}).click();await expect(page.locator('#result')).toBeVisible({timeout:60000});await expect(page.locator('#department')).toHaveText('Billing');await expect(page.locator('#policy-outcome')).toHaveText('Human review');
  await page.screenshot({path:out+'/live-desktop.png',fullPage:true});
  const decisionDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Export JSON'}).click();await(await decisionDownload).saveAs(out+'/live-result.json');
