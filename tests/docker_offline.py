@@ -19,6 +19,10 @@ with contextlib.redirect_stdout(sys.stderr):
         sample = next(item for item in SAMPLES if item['id'] == sample_id)
         result = engine.predict(sample['text'], model, .8)
         assert result['mode'] == 'real_local_inference'
+        assert result['schema_version'] == 2
+        assert len(result['answers']) == 4
+        assert not result['usage']['truncated']
+        assert result['policy']['executes_actions'] is False
         assert result['device'] == 'cpu'
         assert result['answers']['department']['choice'] == 'billing'
         results.append({'sample': sample_id, 'result': result})

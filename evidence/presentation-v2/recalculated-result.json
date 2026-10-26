@@ -1,0 +1,317 @@
+{
+  "inference_input": {
+    "text": "Please send me a copy of my invoice for September. No changes to my subscription are needed and there is no rush.",
+    "model": "typed-decisions",
+    "threshold": 0.8
+  },
+  "selected_threshold": 0,
+  "inference_id": "bcf3390a8b4241959ccc867ef514d1ae",
+  "schema_version": 2,
+  "answers": {
+    "department": {
+      "type": "choice",
+      "choice": "billing",
+      "probabilities": {
+        "billing": 0.7235,
+        "technical": 0.067,
+        "sales": 0.1056,
+        "other": 0.1039
+      },
+      "confidence": 0.3594,
+      "answer_confidence": 0.7235,
+      "action": {
+        "act_probability": 1
+      }
+    },
+    "urgency": {
+      "type": "score",
+      "score": 0.579,
+      "legend": {
+        "0": "Low: informational, routine or explicitly not time-sensitive; nothing is blocked.",
+        "1": "Medium: a problem needs attention soon, but there is no immediate deadline or blocked operation.",
+        "2": "High: an active outage, blocked work, an immediate deadline or a demand for action today."
+      },
+      "probabilities": {
+        "0": 0.4754,
+        "1": 0.4703,
+        "2": 0.0544
+      },
+      "confidence": 0.2112,
+      "answer_confidence": 0.4754,
+      "action": {
+        "act_probability": 1
+      }
+    },
+    "churn_risk": {
+      "type": "noul",
+      "noul": 0.3948,
+      "confidence": 0.6052,
+      "answer_confidence": 0.6052,
+      "action": {
+        "act_probability": 1
+      }
+    },
+    "requested_action": {
+      "type": "choice",
+      "choice": "information",
+      "probabilities": {
+        "information": 0.6679,
+        "refund": 0.0129,
+        "cancellation": 0.0873,
+        "technical_help": 0.0346,
+        "sales_inquiry": 0.0747,
+        "unclear": 0.1226
+      },
+      "confidence": 0.3827,
+      "answer_confidence": 0.6679,
+      "action": {
+        "act_probability": 1
+      }
+    }
+  },
+  "policy": {
+    "version": 2,
+    "threshold": 0,
+    "department": "billing",
+    "routing": {
+      "status": "auto_route_candidate",
+      "team": "billing",
+      "confidence": 0.3594
+    },
+    "priority": {
+      "level": "Medium",
+      "score": 0.579,
+      "confidence": 0.2112,
+      "needs_validation": false
+    },
+    "action": {
+      "kind": "information",
+      "label": "Provide information",
+      "status": "assistance_suggested",
+      "confidence": 0.3827,
+      "approval_required": false
+    },
+    "retention": {
+      "flagged": false,
+      "probability": 0.3948,
+      "confidence": 0.6052
+    },
+    "trace": [
+      {
+        "stage": "Routing",
+        "observed": 0.3594,
+        "threshold": 0,
+        "reason": "Department confidence 35.9% meets the 0% routing threshold."
+      },
+      {
+        "stage": "Priority",
+        "observed": 0.579,
+        "threshold": 1.5,
+        "reason": "Expected urgency 0.58/2 gives medium priority (medium >= 0.5; high >= 1.5). Priority does not block routing."
+      },
+      {
+        "stage": "Action",
+        "observed": "information",
+        "threshold": 0,
+        "reason": "Informational or support assistance can be proposed without financial approval; nothing is executed."
+      },
+      {
+        "stage": "Retention",
+        "observed": 0.3948,
+        "threshold": 0.5,
+        "reason": "Cancellation signal 39.5% does not add a retention flag. This flag alone does not block routing."
+      }
+    ],
+    "executes_actions": false
+  },
+  "policy_comparison": {
+    "conservative": {
+      "version": 2,
+      "threshold": 0.8,
+      "department": "billing",
+      "routing": {
+        "status": "routing_review",
+        "team": "billing",
+        "confidence": 0.3594
+      },
+      "priority": {
+        "level": "Medium",
+        "score": 0.579,
+        "confidence": 0.2112,
+        "needs_validation": true
+      },
+      "action": {
+        "kind": "information",
+        "label": "Provide information",
+        "status": "clarification_required",
+        "confidence": 0.3827,
+        "approval_required": false
+      },
+      "retention": {
+        "flagged": false,
+        "probability": 0.3948,
+        "confidence": 0.6052
+      },
+      "trace": [
+        {
+          "stage": "Routing",
+          "observed": 0.3594,
+          "threshold": 0.8,
+          "reason": "Department confidence 35.9% is below the 80% routing threshold."
+        },
+        {
+          "stage": "Priority",
+          "observed": 0.579,
+          "threshold": 1.5,
+          "reason": "Expected urgency 0.58/2 gives medium priority (medium >= 0.5; high >= 1.5). Priority does not block routing."
+        },
+        {
+          "stage": "Action",
+          "observed": "information",
+          "threshold": 0.8,
+          "reason": "The action is unclear or its confidence is below the threshold; clarify it with a person."
+        },
+        {
+          "stage": "Retention",
+          "observed": 0.3948,
+          "threshold": 0.5,
+          "reason": "Cancellation signal 39.5% does not add a retention flag. This flag alone does not block routing."
+        }
+      ],
+      "executes_actions": false
+    },
+    "balanced": {
+      "version": 2,
+      "threshold": 0.5,
+      "department": "billing",
+      "routing": {
+        "status": "routing_review",
+        "team": "billing",
+        "confidence": 0.3594
+      },
+      "priority": {
+        "level": "Medium",
+        "score": 0.579,
+        "confidence": 0.2112,
+        "needs_validation": true
+      },
+      "action": {
+        "kind": "information",
+        "label": "Provide information",
+        "status": "clarification_required",
+        "confidence": 0.3827,
+        "approval_required": false
+      },
+      "retention": {
+        "flagged": false,
+        "probability": 0.3948,
+        "confidence": 0.6052
+      },
+      "trace": [
+        {
+          "stage": "Routing",
+          "observed": 0.3594,
+          "threshold": 0.5,
+          "reason": "Department confidence 35.9% is below the 50% routing threshold."
+        },
+        {
+          "stage": "Priority",
+          "observed": 0.579,
+          "threshold": 1.5,
+          "reason": "Expected urgency 0.58/2 gives medium priority (medium >= 0.5; high >= 1.5). Priority does not block routing."
+        },
+        {
+          "stage": "Action",
+          "observed": "information",
+          "threshold": 0.5,
+          "reason": "The action is unclear or its confidence is below the threshold; clarify it with a person."
+        },
+        {
+          "stage": "Retention",
+          "observed": 0.3948,
+          "threshold": 0.5,
+          "reason": "Cancellation signal 39.5% does not add a retention flag. This flag alone does not block routing."
+        }
+      ],
+      "executes_actions": false
+    },
+    "exploratory": {
+      "version": 2,
+      "threshold": 0.2,
+      "department": "billing",
+      "routing": {
+        "status": "auto_route_candidate",
+        "team": "billing",
+        "confidence": 0.3594
+      },
+      "priority": {
+        "level": "Medium",
+        "score": 0.579,
+        "confidence": 0.2112,
+        "needs_validation": false
+      },
+      "action": {
+        "kind": "information",
+        "label": "Provide information",
+        "status": "assistance_suggested",
+        "confidence": 0.3827,
+        "approval_required": false
+      },
+      "retention": {
+        "flagged": false,
+        "probability": 0.3948,
+        "confidence": 0.6052
+      },
+      "trace": [
+        {
+          "stage": "Routing",
+          "observed": 0.3594,
+          "threshold": 0.2,
+          "reason": "Department confidence 35.9% meets the 20% routing threshold."
+        },
+        {
+          "stage": "Priority",
+          "observed": 0.579,
+          "threshold": 1.5,
+          "reason": "Expected urgency 0.58/2 gives medium priority (medium >= 0.5; high >= 1.5). Priority does not block routing."
+        },
+        {
+          "stage": "Action",
+          "observed": "information",
+          "threshold": 0.2,
+          "reason": "Informational or support assistance can be proposed without financial approval; nothing is executed."
+        },
+        {
+          "stage": "Retention",
+          "observed": 0.3948,
+          "threshold": 0.5,
+          "reason": "Cancellation signal 39.5% does not add a retention flag. This flag alone does not block routing."
+        }
+      ],
+      "executes_actions": false
+    }
+  },
+  "baseline": {
+    "department": "billing",
+    "elapsed_ms": 0.021,
+    "method": "Ordered keyword rules: billing, technical, sales, other. No semantic inference."
+  },
+  "inference_ms": 246.22,
+  "total_ms": 28305.34,
+  "loaded_this_request": true,
+  "model": "typed-decisions",
+  "model_revision": "55cf4c4ebb4ebe31b2550e8bdf3bd21b99753851",
+  "device": "mps",
+  "cpu_fallback_count": 0,
+  "usage": {
+    "input_tokens": 509,
+    "output_tokens": 0,
+    "state_tokens": 24,
+    "state_tokens_dropped": 0,
+    "truncated": false,
+    "truncated_questions": []
+  },
+  "mode": "real_local_inference",
+  "calibration": "Not calibrated on these demonstration tickets.",
+  "policy_recomputed": true
+}

@@ -1,0 +1,316 @@
+{
+  "inference_input": {
+    "text": "I was charged twice for March. Please refund the duplicate payment today, or I will cancel my subscription.",
+    "model": "typed-decisions",
+    "threshold": 0.8
+  },
+  "selected_threshold": 0.8,
+  "inference_id": "9473814b40fb40f3a9eda4f5a8b1d447",
+  "schema_version": 2,
+  "answers": {
+    "department": {
+      "type": "choice",
+      "choice": "billing",
+      "probabilities": {
+        "billing": 0.8062,
+        "technical": 0.0583,
+        "sales": 0.0532,
+        "other": 0.0824
+      },
+      "confidence": 0.4943,
+      "answer_confidence": 0.8062,
+      "action": {
+        "act_probability": 1
+      }
+    },
+    "urgency": {
+      "type": "score",
+      "score": 1.7834,
+      "legend": {
+        "0": "Low: informational, routine or explicitly not time-sensitive; nothing is blocked.",
+        "1": "Medium: a problem needs attention soon, but there is no immediate deadline or blocked operation.",
+        "2": "High: an active outage, blocked work, an immediate deadline or a demand for action today."
+      },
+      "probabilities": {
+        "0": 0.0386,
+        "1": 0.1395,
+        "2": 0.8219
+      },
+      "confidence": 0.4889,
+      "answer_confidence": 0.8219,
+      "action": {
+        "act_probability": 1
+      }
+    },
+    "churn_risk": {
+      "type": "noul",
+      "noul": 0.7203,
+      "confidence": 0.7203,
+      "answer_confidence": 0.7203,
+      "action": {
+        "act_probability": 1
+      }
+    },
+    "requested_action": {
+      "type": "choice",
+      "choice": "refund",
+      "probabilities": {
+        "information": 0.0129,
+        "refund": 0.7352,
+        "cancellation": 0.1951,
+        "technical_help": 0.0097,
+        "sales_inquiry": 0.0356,
+        "unclear": 0.0116
+      },
+      "confidence": 0.5443,
+      "answer_confidence": 0.7352,
+      "action": {
+        "act_probability": 1
+      }
+    }
+  },
+  "policy": {
+    "version": 2,
+    "threshold": 0.8,
+    "department": "billing",
+    "routing": {
+      "status": "routing_review",
+      "team": "billing",
+      "confidence": 0.4943
+    },
+    "priority": {
+      "level": "High",
+      "score": 1.7834,
+      "confidence": 0.4889,
+      "needs_validation": true
+    },
+    "action": {
+      "kind": "refund",
+      "label": "Review a refund request",
+      "status": "approval_required",
+      "confidence": 0.5443,
+      "approval_required": true
+    },
+    "retention": {
+      "flagged": true,
+      "probability": 0.7203,
+      "confidence": 0.7203
+    },
+    "trace": [
+      {
+        "stage": "Routing",
+        "observed": 0.4943,
+        "threshold": 0.8,
+        "reason": "Department confidence 49.4% is below the 80% routing threshold."
+      },
+      {
+        "stage": "Priority",
+        "observed": 1.7834,
+        "threshold": 1.5,
+        "reason": "Expected urgency 1.78/2 gives high priority (medium >= 0.5; high >= 1.5). Priority does not block routing."
+      },
+      {
+        "stage": "Action",
+        "observed": "refund",
+        "threshold": 0.8,
+        "reason": "Refunds and cancellations require human approval regardless of confidence."
+      },
+      {
+        "stage": "Retention",
+        "observed": 0.7203,
+        "threshold": 0.5,
+        "reason": "Cancellation signal 72.0% adds a retention flag. This flag alone does not block routing."
+      }
+    ],
+    "executes_actions": false
+  },
+  "policy_comparison": {
+    "conservative": {
+      "version": 2,
+      "threshold": 0.8,
+      "department": "billing",
+      "routing": {
+        "status": "routing_review",
+        "team": "billing",
+        "confidence": 0.4943
+      },
+      "priority": {
+        "level": "High",
+        "score": 1.7834,
+        "confidence": 0.4889,
+        "needs_validation": true
+      },
+      "action": {
+        "kind": "refund",
+        "label": "Review a refund request",
+        "status": "approval_required",
+        "confidence": 0.5443,
+        "approval_required": true
+      },
+      "retention": {
+        "flagged": true,
+        "probability": 0.7203,
+        "confidence": 0.7203
+      },
+      "trace": [
+        {
+          "stage": "Routing",
+          "observed": 0.4943,
+          "threshold": 0.8,
+          "reason": "Department confidence 49.4% is below the 80% routing threshold."
+        },
+        {
+          "stage": "Priority",
+          "observed": 1.7834,
+          "threshold": 1.5,
+          "reason": "Expected urgency 1.78/2 gives high priority (medium >= 0.5; high >= 1.5). Priority does not block routing."
+        },
+        {
+          "stage": "Action",
+          "observed": "refund",
+          "threshold": 0.8,
+          "reason": "Refunds and cancellations require human approval regardless of confidence."
+        },
+        {
+          "stage": "Retention",
+          "observed": 0.7203,
+          "threshold": 0.5,
+          "reason": "Cancellation signal 72.0% adds a retention flag. This flag alone does not block routing."
+        }
+      ],
+      "executes_actions": false
+    },
+    "balanced": {
+      "version": 2,
+      "threshold": 0.5,
+      "department": "billing",
+      "routing": {
+        "status": "routing_review",
+        "team": "billing",
+        "confidence": 0.4943
+      },
+      "priority": {
+        "level": "High",
+        "score": 1.7834,
+        "confidence": 0.4889,
+        "needs_validation": true
+      },
+      "action": {
+        "kind": "refund",
+        "label": "Review a refund request",
+        "status": "approval_required",
+        "confidence": 0.5443,
+        "approval_required": true
+      },
+      "retention": {
+        "flagged": true,
+        "probability": 0.7203,
+        "confidence": 0.7203
+      },
+      "trace": [
+        {
+          "stage": "Routing",
+          "observed": 0.4943,
+          "threshold": 0.5,
+          "reason": "Department confidence 49.4% is below the 50% routing threshold."
+        },
+        {
+          "stage": "Priority",
+          "observed": 1.7834,
+          "threshold": 1.5,
+          "reason": "Expected urgency 1.78/2 gives high priority (medium >= 0.5; high >= 1.5). Priority does not block routing."
+        },
+        {
+          "stage": "Action",
+          "observed": "refund",
+          "threshold": 0.5,
+          "reason": "Refunds and cancellations require human approval regardless of confidence."
+        },
+        {
+          "stage": "Retention",
+          "observed": 0.7203,
+          "threshold": 0.5,
+          "reason": "Cancellation signal 72.0% adds a retention flag. This flag alone does not block routing."
+        }
+      ],
+      "executes_actions": false
+    },
+    "exploratory": {
+      "version": 2,
+      "threshold": 0.2,
+      "department": "billing",
+      "routing": {
+        "status": "auto_route_candidate",
+        "team": "billing",
+        "confidence": 0.4943
+      },
+      "priority": {
+        "level": "High",
+        "score": 1.7834,
+        "confidence": 0.4889,
+        "needs_validation": false
+      },
+      "action": {
+        "kind": "refund",
+        "label": "Review a refund request",
+        "status": "approval_required",
+        "confidence": 0.5443,
+        "approval_required": true
+      },
+      "retention": {
+        "flagged": true,
+        "probability": 0.7203,
+        "confidence": 0.7203
+      },
+      "trace": [
+        {
+          "stage": "Routing",
+          "observed": 0.4943,
+          "threshold": 0.2,
+          "reason": "Department confidence 49.4% meets the 20% routing threshold."
+        },
+        {
+          "stage": "Priority",
+          "observed": 1.7834,
+          "threshold": 1.5,
+          "reason": "Expected urgency 1.78/2 gives high priority (medium >= 0.5; high >= 1.5). Priority does not block routing."
+        },
+        {
+          "stage": "Action",
+          "observed": "refund",
+          "threshold": 0.2,
+          "reason": "Refunds and cancellations require human approval regardless of confidence."
+        },
+        {
+          "stage": "Retention",
+          "observed": 0.7203,
+          "threshold": 0.5,
+          "reason": "Cancellation signal 72.0% adds a retention flag. This flag alone does not block routing."
+        }
+      ],
+      "executes_actions": false
+    }
+  },
+  "baseline": {
+    "department": "billing",
+    "elapsed_ms": 0.011,
+    "method": "Ordered keyword rules: billing, technical, sales, other. No semantic inference."
+  },
+  "inference_ms": 233.67,
+  "total_ms": 234.13,
+  "loaded_this_request": false,
+  "model": "typed-decisions",
+  "model_revision": "55cf4c4ebb4ebe31b2550e8bdf3bd21b99753851",
+  "device": "mps",
+  "cpu_fallback_count": 0,
+  "usage": {
+    "input_tokens": 497,
+    "output_tokens": 0,
+    "state_tokens": 21,
+    "state_tokens_dropped": 0,
+    "truncated": false,
+    "truncated_questions": []
+  },
+  "mode": "real_local_inference",
+  "calibration": "Not calibrated on these demonstration tickets."
+}

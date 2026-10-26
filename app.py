@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import threading
 import time
+import uuid
 from typing import Literal
 from contextlib import asynccontextmanager
 
@@ -18,7 +19,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel, Field, field_validator
-from domain import baseline, policy
+from domain import baseline, policy, compare_policies, POLICY_PRESETS
 
 QUESTIONS = json.loads((ROOT / 'questions.json').read_text())
 SAMPLES = json.loads((ROOT / 'samples.json').read_text())
@@ -76,7 +77,9 @@ class Engine:
             sync()
             inference_ms = round((time.perf_counter()-inference_start)*1000, 2)
             self.state = 'ready'
-            return {'answers': result['answers'], 'policy': policy(result['answers'], threshold),
+            return {'inference_id': uuid.uuid4().hex, 'schema_version': 2,
+                    'answers': result['answers'], 'policy': policy(result['answers'], threshold),
+                    'policy_comparison': compare_policies(result['answers']),
                     'baseline': baseline(text), 'inference_ms': inference_ms,
                     'total_ms': round((time.perf_counter()-start)*1000, 2), 'loaded_this_request': loaded,
                     'model': model, 'model_revision': MODEL_REVISION, 'device': str(self.agent.device),
@@ -134,6 +137,35 @@ class Analysis(BaseModel):
             raise ValueError('Enter a ticket to analyze.')
         return value.strip()
 
+class Confidence(BaseModel):
+    confidence: float = Field(ge=0, le=1, allow_inf_nan=False)
+
+class DepartmentAnswer(Confidence):
+    choice: Literal['billing', 'technical', 'sales', 'other']
+
+class UrgencyAnswer(Confidence):
+    score: float = Field(ge=0, le=2, allow_inf_nan=False)
+
+class CancellationAnswer(Confidence):
+    noul: float = Field(ge=0, le=1, allow_inf_nan=False)
+
+class ActionAnswer(Confidence):
+    choice: Literal['information', 'refund', 'cancellation', 'technical_help', 'sales_inquiry', 'unclear']
+
+class DecisionAnswers(BaseModel):
+    department: DepartmentAnswer
+    urgency: UrgencyAnswer
+    churn_risk: CancellationAnswer
+    requested_action: ActionAnswer
+
+class PolicyRequest(BaseModel):
+    answers: DecisionAnswers
+    threshold: float = Field(ge=0, le=1, allow_inf_nan=False)
+
+@app.post('/api/policy')
+def recalculate_policy(body: PolicyRequest):
+    return {'policy': policy(body.answers.model_dump(), body.threshold), 'inference_performed': False}
+
 @app.get('/api/status')
 def status():
     import laya
@@ -142,7 +174,7 @@ def status():
 
 @app.get('/api/config')
 def config():
-    return {'samples': SAMPLES, 'questions': QUESTIONS, 'models': MODEL_NAMES, 'revision': MODEL_REVISION}
+    return {'samples': SAMPLES, 'questions': QUESTIONS, 'models': MODEL_NAMES, 'revision': MODEL_REVISION, 'policy_presets': POLICY_PRESETS, 'schema_version': 2}
 
 @app.post('/api/analyze')
 def analyze(body: Analysis):

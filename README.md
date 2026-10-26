@@ -1,12 +1,12 @@
 # Laya Decision Lab
 
-A local proof of concept accompanying **Untitled slide.pdf**, George Michelon's presentation about Laya (October 2026). It implements the ticket triage example from slide 8 with real inference, without canned responses. The interface is in English to match the slides; sample tickets are available in English and Portuguese.
+A local, interactive ticket-triage demonstration with real Laya inference. The interface and documentation are in English; the 16 synthetic examples include English and Portuguese. The app never refunds, cancels subscriptions, routes real tickets or contacts customers.
 
-For an isolated installation, follow [Run with Docker](#run-with-docker). To use Metal acceleration directly on your Mac, use the native launcher below.
+**For presenting:** open the **Presenter guide** tab and read [the speaker notes](PRESENTATION.md). The central idea is: **Laya predicts signals; your policy determines the proposed workflow.**
 
-## Run on macOS
+## Run natively on macOS
 
-Open `start.command` in Terminal, or run:
+Python 3.11 is recommended. Clone the repository, then run:
 
 ```bash
 git clone https://github.com/geomichelon/laya-decision-lab.git
@@ -14,56 +14,58 @@ cd laya-decision-lab
 bash start.command
 ```
 
-Visit **http://127.0.0.1:8765**. Keep Terminal open; press Ctrl+C to stop. If the PoC is already using the port, use the existing instance. On the first run, the launcher prepares an isolated environment at `~/Library/Application Support/LayaDecisionLab/venv` on macOS (on the internal drive), or `.venv` on Linux. Python 3.11 is recommended; exact dependencies are listed in `requirements.lock.txt`. This PoC is independent of Archmazing.
+Open **http://127.0.0.1:8765** and wait for **Local model ready**. Keep Terminal open; Ctrl+C stops the server. The launcher installs the locked dependencies into `~/Library/Application Support/LayaDecisionLab/venv` on macOS, or `.venv` on Linux. Native Linux execution has not been validated.
 
-The model runs locally using PyTorch/MPS (Metal) when available, or CPU. To select CPU explicitly, use `LAYA_LAB_DEVICE=cpu bash start.command`. Public weights are downloaded from Hugging Face on first use; no API key is required. The cache is stored in `.cache/huggingface`; checkpoints and the Python environment are excluded from Git. Two checkpoints are used: `typed-decisions` for English and `multilingual` for Portuguese. Only one is kept in memory at a time; switching languages requires loading the other checkpoint.
+PyTorch uses Metal (MPS) when available, otherwise CPU. To force CPU: `LAYA_LAB_DEVICE=cpu bash start.command`. Public model weights are downloaded from Hugging Face without a key and stored in `.cache/huggingface`. English uses `typed-decisions`; Portuguese uses `multilingual`. Only one checkpoint stays resident, so changing languages includes loading time. Run both languages before presenting. After dependencies and both checkpoints are cached:
 
-Before presenting, run all eight samples to download both checkpoints. Once dependencies and weights are available, you can start with `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 bash start.command`. Initial loading and inference may take longer. Keep the cache for the demonstration.
+```bash
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 bash start.command
+```
 
-## Demo walkthrough (3–5 minutes)
+## How the demo works
 
-1. After slide 7, open the PoC and click **Present** for fullscreen mode. Slide 8 provides the visual introduction.
-2. In **Live demo**, choose **Duplicate charge**, then **Analyze ticket**. Show the department (`choice`), urgency distribution (`score`), and probability of cancellation intent (`noul`). These are real results and may differ from the illustrative values in the PDF.
-3. Explain **Policy outcome**: a deterministic rule applied to the predictions, rather than another generated response. No refunds or cancellations are executed.
-4. Try **The negation test**, followed by a custom ticket. The model can be wrong even with high confidence. Include examples that expose its limitations.
-5. Open **Decision schema** to show the questions and criteria sent to the model. The urgency label is the most likely level; the decimal value is the expected ordinal value.
-6. In **Evaluate samples**, run all eight cases. Show correct and incorrect predictions for each ticket, department accuracy against expected labels, the rules baseline, and measured latency. Export the JSON for review.
-7. Return to the presentation: this demonstrates integration and behavior, while adoption still requires representative data, calibration, and independent evaluation.
+1. A ticket and the fixed questions in `questions.json` are sent to one local Laya SDK prediction call. Expected sample labels are never sent to the model.
+2. Laya returns four signals: department (`choice`), urgency (`score`, 0–2), cancellation intent (`noul`) and requested action (`choice`). They are predictions, not permissions.
+3. Deterministic Python rules in `domain.py` produce separate routing, priority and action proposals. The trace explains these rules, not the model's hidden reasoning.
+4. Exports retain the inference ID, original inputs, schema version, checkpoint revision, predictions, policy and measured latency. Editing the ticket or checkpoint invalidates the previous result.
 
-## Presentation review
+### Routing, priority and approval are independent
 
-The nine slides connect the project's origins, architecture, usage, alternatives, and pilot. Slide 8 defines a suitable PoC scope; slide 9 only checks whether the package can be imported. The demonstration also covers model loading, inference, and the interface.
+| Decision | Rule | Meaning |
+|---|---|---|
+| Team / routing | Department confidence >= selected threshold | Eligible for automatic routing; otherwise review the team assignment. No ticket is actually routed. |
+| Priority | Expected urgency >= 1.5 is High; >= 0.5 is Medium; otherwise Low | Low urgency confidence adds a validation flag. Neither urgency nor this flag blocks routing. |
+| Refund / cancellation action | Always requires approval when predicted | Confidence cannot waive financial/account approval. |
+| Other action | Unclear label or action confidence below threshold requires clarification | Otherwise informational, technical or sales assistance is suggested. No action is executed. |
+| Retention | Cancellation probability >= 0.5 | Adds an attention flag without blocking routing. |
 
-The main narrative improvement is to distinguish **prediction**, **confidence**, and **policy**. A structured output can still be semantically wrong. The official documentation describes sensitivity to labels and negation, as well as the need for domain evaluation and calibration. This demo therefore does not present confidence as measured accuracy.
+The policy can only react to what the model predicts. A missed refund or cancellation is still possible, so these rules are not a production safety guarantee. The demo is a proposal-only system.
 
-Slide 7 proposes a full comparison with Jev, LLMs, and rules. This version implements **Laya versus rules for department classification**. It does not integrate Jev or an LLM, measure financial costs, or compare latency with external APIs. Eight visible synthetic tickets are not an independent test set. These results should not be used as a market benchmark or evidence of superiority.
+### What the threshold means
 
-When updating the slides, replace “No live inference” on slide 8 with a reference to the live demo. Keep the numbers labeled as examples, or use an exported result with hardware, version, and date details. Add sources to slide 2 and the technical limitations. The public repository is [geomichelon/laya-decision-lab](https://github.com/geomichelon/laya-decision-lab). The original PDF was preserved and is not included in this repository.
+**Probability** ranks candidate answers. **Confidence** is a separate SDK output, not measured accuracy. Routing uses department confidence, not the minimum confidence across all questions. Low confidence in urgency or action stays visible in its own decision.
 
-## Implementation and limitations
+Conservative (80%), Balanced (50%) and Exploratory (20%) are **experimental presets**, not calibrated recommendations. The same threshold also flags uncertain priority/action predictions. Changing a preset or the slider calls `/api/policy` with the existing answers. It does not call Laya again; the prediction, inference ID and inference time stay unchanged. The original inference input and current policy threshold are exported separately.
 
-- FastAPI backend; HTML/CSS/JavaScript frontend without CDNs. The server binds to `127.0.0.1`.
-- Laya 0.4.15, using `convaiinnovations/laya` weights pinned to revision `55cf4c4ebb4ebe31b2550e8bdf3bd21b99753851`.
-- Questions are defined in `questions.json`. Expected labels in `samples.json` are used only for evaluation and are not sent to the model.
-- The policy suggests human review if any confidence is below the threshold, cancellation probability is at least 0.5, or expected urgency is at least 1.5. The default 80% confidence threshold is illustrative and has not been calibrated for this domain. The policy never executes actions.
-- Inference latency includes the local SDK call and GPU synchronization. It excludes downloads, model loading, and HTTP overhead; total server time is reported separately. Sample p95 uses the nearest-rank method and includes the first inference after loading each model. It is not a production performance guarantee.
-- Baseline: ordered keyword rules for Billing, Technical, Sales, and Other. It compares department classification only and does not understand negation or context.
-- Input is limited to 2,000 characters and 450 checkpoint tokens to reduce truncation risk. Errors are not replaced with simulated responses. Inference is serialized; concurrent requests receive HTTP 409.
-- Custom ticket text is neither saved to disk nor sent to an inference API. Exports are saved only when the user downloads the JSON. Artifacts in `evidence/` contain synthetic tickets only.
+A refund can be eligible for automatic routing to Billing while still requiring human approval. High urgency can raise priority without making the team assignment uncertain.
 
-## Tests
+## Evaluate the trade-offs
+
+**Evaluate samples** runs 16 visible synthetic examples: routine requests, outages, refunds, cancellation, negation, typos, paraphrases, ambiguous text and multiple requests. Labels are demonstration expectations, not adjudicated production ground truth; ambiguous cases can reasonably need discussion.
+
+The report shows department agreement against a keyword baseline, requested-action agreement, latency, automatic-routing eligibility and wrong auto-routes. The comparison table reuses the same predictions across all three policies. Its error denominator is the number of eligible routes; zero eligible routes is shown as N/A, not perfect accuracy. Action approval is reported separately.
+
+These are not held-out examples and the thresholds have not been calibrated. Less review alone is not evidence of improvement. No LLM comparison, financial saving or production-accuracy claim is established. The keyword baseline is intentionally simple and covers only department classification.
+
+## Tests and evidence
 
 ```bash
 "$HOME/Library/Application Support/LayaDecisionLab/venv/bin/python" -m unittest discover -s tests -v
 ```
 
-Three tests cover policy boundaries, a single low-confidence output, invalid input, and allowed origins and hosts. Chromium checks covered real inference, JSON export, clearing results after edits, the schema, all eight samples, Portuguese input, and a 390 px viewport without horizontal overflow.
+The tests cover routing/approval separation, urgency and retention, uncertain actions, threshold boundaries, policy comparisons, HTTP validation and policy recalculation without inference.
 
-The real evaluation on October 25, 2026 produced **7/8 correct departments (87.5%)**, compared with 8/8 for rules; cancellation classification was correct in 6/8 cases (75%), and urgency mean absolute error was 0.569 on a 0–2 scale. The initial evaluation measured p50 = 119.55 ms and p95 = 498.34 ms; the final offline retest measured p50 = 114.14 ms and p95 = 142.69 ms across eight inferences, excluding model loading. The illustrative 80% threshold sent every case to human review. The first request in the initial session took 2,715 ms; warmup and Mac workload affect latency. The Portuguese pricing request was incorrectly classified as Billing. The English outage case produced a false positive for cancellation intent. These results do not demonstrate an advantage over rules on this sample set.
-
-Inference and browser evidence is available in `evidence/`, including responses, schema and revision details, latencies, and screenshots. Inference responses are real. These results should not be extrapolated to production.
-
-To repeat the browser checks while the server is running:
+With the native server running, install the optional browser-test dependencies (Node.js 20+) and execute:
 
 ```bash
 npm ci
@@ -71,7 +73,19 @@ npx playwright install chromium
 npm run test:browser
 ```
 
-The browser test runs real local inference and overwrites only synthetic-ticket evidence in `evidence/`. The complete retest also passed with `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1` after both checkpoints had been downloaded. An early test exposed a brief window where the analysis button was enabled before model status had been fetched; UI initialization now waits for model status.
+The browser test performs real inference and stores synthetic-ticket results and screenshots in `evidence/presentation-v2/`. It verifies policy edits preserve predictions and do not submit another inference, all 16 examples, metric counts, exports, guide links, Portuguese, and desktop/mobile layouts. `BASE_URL`, `EVIDENCE_DIR` and `EXPECT_DEVICE` can override the target, evidence directory and expected device.
+
+Previous three-question/eight-sample results are preserved under `evidence/` and `evidence/docker/` as historical evidence. They do not measure the current four-question demo. Current measurements and presentation examples are described in [PRESENTATION.md](PRESENTATION.md).
+
+## Implementation and limits
+
+- FastAPI backend; HTML/CSS/JavaScript frontend, without CDNs. Local server only.
+- Laya 0.4.15 and `convaiinnovations/laya` revision `55cf4c4ebb4ebe31b2550e8bdf3bd21b99753851`; no paid inference APIs.
+- Inputs are limited to 2,000 characters and 450 checkpoint tokens. Inference is serialized; concurrent model requests receive HTTP 409. Failures are shown rather than replaced by simulated predictions.
+- Inference time includes the SDK call and MPS synchronization, but excludes model downloads, loading and HTTP overhead. Server total time is separate. Sample p95 uses nearest rank and can include first inferences after loading.
+- Custom ticket text is not stored by the application or sent to a remote inference API. JSON files are saved only when explicitly exported; committed evidence contains synthetic samples.
+- The SDK warns about checkpoint temperatures for some entries. Confidence remains uncalibrated; structured output can still be semantically wrong.
+- Adding the requested-action question did not train or fine-tune the model. A schema is an input contract, not learned domain expertise.
 
 ## Run with Docker
 
@@ -112,7 +126,7 @@ docker compose down
 
 Model downloads are kept in the named Docker volume `laya-decision-lab_models`, including across container recreation. Running `docker compose down` preserves that volume; adding `-v` deletes it and requires downloading the models again. The Docker volume is separate from the native launcher's `.cache/huggingface` directory.
 
-After running all eight samples to cache both checkpoints, recreate the service in offline mode:
+After running all 16 samples to cache both checkpoints, recreate the service in offline mode:
 
 ```bash
 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 docker compose up -d --no-build --force-recreate
@@ -125,25 +139,20 @@ To repeat the browser checks against Docker without replacing the native-run evi
 ```bash
 npm ci
 npx playwright install chromium
-BASE_URL=http://127.0.0.1:8765 EVIDENCE_DIR=evidence/docker npm run test:browser
+BASE_URL=http://127.0.0.1:8765 EXPECT_DEVICE=cpu EVIDENCE_DIR=evidence/docker-v2 npm run test:browser
 ```
 
-Use port 8766 in `BASE_URL` if that is where the container is running. These checks execute real local inference, including all eight samples.
+Use port 8766 in `BASE_URL` if that is where the container is running. These checks execute real local inference, including all 16 samples.
 
-### Docker validation
+The current four-question version also passed eight Python tests and real English/Portuguese inference in a network-isolated Docker CPU container on October 26, 2026. See `evidence/docker-v2/offline-result.json`. The current full browser flow was tested natively on Metal.
 
-Validated on October 25, 2026 with Docker Desktop 4.42.1, Engine 28.2.2, and Compose 2.37.1 on Apple Silicon (`linux/arm64`), with 8 CPUs and approximately 7.65 GiB allocated to Docker. The image uses PyTorch `2.14.1+cpu` without CUDA libraries and is approximately 1.17 GB before model downloads. Windows and `linux/amd64` have not been validated.
+### Docker validation history
 
-- A clean build and first startup with a new model volume passed. Downloading and loading the English checkpoint took approximately 33 seconds on this connection.
-- All three Python tests passed inside the image.
-- Chromium checks passed for real inference, JSON export, editing, the schema, all eight samples, Portuguese, and desktop/mobile layouts. All eight inference requests succeeded; department accuracy remained 7/8, compared with 8/8 for the rules baseline.
-- Docker/CPU inference latency across the eight samples was p50 = 1,231.49 ms and p95 = 1,391.98 ms, excluding downloads and loading. These measurements are separate from the native Metal results above.
-- Both checkpoints produced real results in a new container with `--network none`, using the persisted model volume.
-- Recreating the Compose service with offline mode enabled returned it to `healthy`; a subsequent real HTTP inference also passed.
+The original Docker installation was validated on October 25, 2026 on Apple Silicon (`linux/arm64`), Docker Desktop 4.42.1, Engine 28.2.2 and Compose 2.37.1, with 8 CPUs and approximately 7.65 GiB allocated. PyTorch `2.14.1+cpu` avoids CUDA downloads. Windows and `linux/amd64` have not been validated.
 
-Evidence is in [`evidence/docker/validation.json`](evidence/docker/validation.json), with browser screenshots and exported predictions in the same directory. The SDK emitted a checkpoint-temperature warning; confidence remains uncalibrated and the review threshold remains illustrative.
+That run covered a fresh model volume, real browser inference, both checkpoints in a new `--network none` container, and healthy offline recreation. Original evidence is in `evidence/docker/validation.json`; its eight-sample metrics belong to the previous schema.
 
-To repeat the network-isolated check after both models have been cached:
+After caching both models, repeat the current network-isolated inference check:
 
 ```bash
 docker run --rm -i --network none -v laya-decision-lab_models:/models laya-decision-lab:local python - < tests/docker_offline.py
@@ -152,8 +161,7 @@ docker run --rm -i --network none -v laya-decision-lab_models:/models laya-decis
 ## Sources
 
 - [Official Laya source and limitations](https://github.com/NandhaKishorM/laya)
-- [Question and answer types](https://github.com/NandhaKishorM/laya/blob/main/docs/questions-and-answers.md)
+- [Typed questions and answers](https://github.com/NandhaKishorM/laya/blob/main/docs/questions-and-answers.md)
 - [Python distribution](https://pypi.org/project/laya/)
 - [Public model weights](https://huggingface.co/convaiinnovations/laya)
-
-- [Official PyTorch CPU installation instructions](https://pytorch.org/get-started/locally/)
+- [PyTorch CPU installation](https://pytorch.org/get-started/locally/)

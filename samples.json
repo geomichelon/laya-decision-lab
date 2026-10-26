@@ -1,10 +1,210 @@
 [
- {"id":"duplicate","title":"Duplicate charge","language":"en","text":"I was charged twice for March. Please refund the duplicate payment today, or I will cancel my subscription.","expected":{"department":"billing","urgency":2,"churn_risk":true}},
- {"id":"outage","title":"Production outage","language":"en","text":"All users get an error when signing in. Our team cannot work and we need the service restored immediately.","expected":{"department":"technical","urgency":2,"churn_risk":false}},
- {"id":"pricing","title":"A future purchase","language":"en","text":"Could you send me the pricing for a team of 20 and a comparison of your plans? We are evaluating options for next quarter; there is no rush.","expected":{"department":"sales","urgency":0,"churn_risk":false}},
- {"id":"negation","title":"The negation test","language":"en","text":"I do not want to cancel my subscription. I only need a copy of last month's invoice for our records. There is no rush.","expected":{"department":"billing","urgency":0,"churn_risk":false}},
- {"id":"feedback","title":"A small suggestion","language":"en","text":"I love the product. Just a suggestion for the future: a darker theme would be nice. Nothing is broken and no action is needed now.","expected":{"department":"other","urgency":0,"churn_risk":false}},
- {"id":"cancel","title":"Leaving the service","language":"en","text":"Please cancel my subscription before it renews today. I have decided to leave and use another provider.","expected":{"department":"billing","urgency":2,"churn_risk":true}},
- {"id":"pt-billing","title":"Cobrança duplicada","language":"pt","text":"Fui cobrado duas vezes neste mês. Preciso do estorno hoje ou vou cancelar minha assinatura.","expected":{"department":"billing","urgency":2,"churn_risk":true}},
- {"id":"pt-pricing","title":"Uma nova equipe","language":"pt","text":"Gostaria de conhecer os preços dos planos para uma equipe de vinte pessoas. Estamos planejando a compra para o próximo trimestre, sem urgência.","expected":{"department":"sales","urgency":0,"churn_risk":false}}
+  {
+    "id": "duplicate",
+    "title": "Duplicate charge",
+    "language": "en",
+    "text": "I was charged twice for March. Please refund the duplicate payment today, or I will cancel my subscription.",
+    "expected": {
+      "department": "billing",
+      "urgency": 2,
+      "churn_risk": true,
+      "requested_action": "refund"
+    },
+    "category": "Existing demonstration"
+  },
+  {
+    "id": "outage",
+    "title": "Production outage",
+    "language": "en",
+    "text": "All users get an error when signing in. Our team cannot work and we need the service restored immediately.",
+    "expected": {
+      "department": "technical",
+      "urgency": 2,
+      "churn_risk": false,
+      "requested_action": "technical_help"
+    },
+    "category": "Existing demonstration"
+  },
+  {
+    "id": "pricing",
+    "title": "A future purchase",
+    "language": "en",
+    "text": "Could you send me the pricing for a team of 20 and a comparison of your plans? We are evaluating options for next quarter; there is no rush.",
+    "expected": {
+      "department": "sales",
+      "urgency": 0,
+      "churn_risk": false,
+      "requested_action": "sales_inquiry"
+    },
+    "category": "Existing demonstration"
+  },
+  {
+    "id": "negation",
+    "title": "The negation test",
+    "language": "en",
+    "text": "I do not want to cancel my subscription. I only need a copy of last month's invoice for our records. There is no rush.",
+    "expected": {
+      "department": "billing",
+      "urgency": 0,
+      "churn_risk": false,
+      "requested_action": "information"
+    },
+    "category": "Existing demonstration"
+  },
+  {
+    "id": "feedback",
+    "title": "A small suggestion",
+    "language": "en",
+    "text": "I love the product. Just a suggestion for the future: a darker theme would be nice. Nothing is broken and no action is needed now.",
+    "expected": {
+      "department": "other",
+      "urgency": 0,
+      "churn_risk": false,
+      "requested_action": "information"
+    },
+    "category": "Existing demonstration"
+  },
+  {
+    "id": "cancel",
+    "title": "Leaving the service",
+    "language": "en",
+    "text": "Please cancel my subscription before it renews today. I have decided to leave and use another provider.",
+    "expected": {
+      "department": "billing",
+      "urgency": 2,
+      "churn_risk": true,
+      "requested_action": "cancellation"
+    },
+    "category": "Existing demonstration"
+  },
+  {
+    "id": "pt-billing",
+    "title": "Cobrança duplicada",
+    "language": "pt",
+    "text": "Fui cobrado duas vezes neste mês. Preciso do estorno hoje ou vou cancelar minha assinatura.",
+    "expected": {
+      "department": "billing",
+      "urgency": 2,
+      "churn_risk": true,
+      "requested_action": "refund"
+    },
+    "category": "Existing demonstration"
+  },
+  {
+    "id": "pt-pricing",
+    "title": "Uma nova equipe",
+    "language": "pt",
+    "text": "Gostaria de conhecer os preços dos planos para uma equipe de vinte pessoas. Estamos planejando a compra para o próximo trimestre, sem urgência.",
+    "expected": {
+      "department": "sales",
+      "urgency": 0,
+      "churn_risk": false,
+      "requested_action": "sales_inquiry"
+    },
+    "category": "Existing demonstration"
+  },
+  {
+    "id": "invoice",
+    "title": "Routine invoice copy",
+    "language": "en",
+    "category": "Routine",
+    "text": "Please send me a copy of my invoice for September. No changes to my subscription are needed and there is no rush.",
+    "expected": {
+      "department": "billing",
+      "urgency": 0,
+      "churn_risk": false,
+      "requested_action": "information"
+    }
+  },
+  {
+    "id": "howto",
+    "title": "Getting started",
+    "language": "en",
+    "category": "Routine",
+    "text": "Where can I find the user guide? I am learning the product and nothing is broken.",
+    "expected": {
+      "department": "other",
+      "urgency": 0,
+      "churn_risk": false,
+      "requested_action": "information"
+    }
+  },
+  {
+    "id": "typo",
+    "title": "Login with typos",
+    "language": "en",
+    "category": "Noisy text",
+    "text": "I cant logg in, the app says eror 503. My work is blocked and I need help right now.",
+    "expected": {
+      "department": "technical",
+      "urgency": 2,
+      "churn_risk": false,
+      "requested_action": "technical_help"
+    }
+  },
+  {
+    "id": "ambiguous",
+    "title": "Not enough context",
+    "language": "en",
+    "category": "Ambiguous",
+    "text": "It happened again. Please sort it out.",
+    "expected": {
+      "department": "other",
+      "urgency": 1,
+      "churn_risk": false,
+      "requested_action": "unclear"
+    }
+  },
+  {
+    "id": "multiple",
+    "title": "Two competing requests",
+    "language": "en",
+    "category": "Multiple requests",
+    "text": "Please refund my last payment and cancel my subscription today. I need both actions completed.",
+    "expected": {
+      "department": "billing",
+      "urgency": 2,
+      "churn_risk": true,
+      "requested_action": "unclear"
+    }
+  },
+  {
+    "id": "pt-invoice",
+    "title": "Routine invoice in Portuguese",
+    "language": "pt",
+    "category": "Routine",
+    "text": "Pode enviar uma cópia da minha fatura de setembro? Não quero cancelar nem pedir estorno. Não tenho urgência.",
+    "expected": {
+      "department": "billing",
+      "urgency": 0,
+      "churn_risk": false,
+      "requested_action": "information"
+    }
+  },
+  {
+    "id": "paraphrase",
+    "title": "No technical keywords",
+    "language": "en",
+    "category": "Paraphrase",
+    "text": "Whenever I press the blue button, the screen turns white and my work disappears. Please help me get this working again.",
+    "expected": {
+      "department": "technical",
+      "urgency": 1,
+      "churn_risk": false,
+      "requested_action": "technical_help"
+    }
+  },
+  {
+    "id": "negated-refund",
+    "title": "Refund explicitly declined",
+    "language": "en",
+    "category": "Negation",
+    "text": "I do not want a refund and I am keeping my subscription. I only need a copy of the receipt, whenever convenient.",
+    "expected": {
+      "department": "billing",
+      "urgency": 0,
+      "churn_risk": false,
+      "requested_action": "information"
+    }
+  }
 ]

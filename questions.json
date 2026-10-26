@@ -25,5 +25,17 @@
       "false": "The customer does not intend or threaten to cancel or leave; this includes explicitly saying they do not want to cancel.",
       "true": "The customer explicitly requests cancellation or threatens to cancel their subscription or leave the service."
     }
+  },
+  "requested_action": {
+    "type": "choice",
+    "instructions": "What action does the customer actually request now? Distinguish a requested cancellation from a conditional threat. If multiple concrete actions conflict or there is insufficient detail, choose unclear.",
+    "criteria": {
+      "information": "A copy of an invoice, general information or feedback; no refund, cancellation or technical intervention requested.",
+      "refund": "The customer asks for money to be returned or a duplicate charge reversed, even if they threaten to cancel otherwise.",
+      "cancellation": "The customer explicitly asks to cancel now, not merely threatening to cancel unless an issue is fixed.",
+      "technical_help": "The customer wants help resolving a software, login or service problem.",
+      "sales_inquiry": "The customer wants prices, a product demonstration or a plan comparison before buying.",
+      "unclear": "The requested action is unspecified or there are multiple conflicting concrete requests."
+    }
   }
 }

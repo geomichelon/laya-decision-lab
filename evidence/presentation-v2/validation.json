@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-26",
+  "schema_version": 2,
+  "policy_version": 2,
+  "questions": 4,
+  "synthetic_samples": 16,
+  "native_device": "mps",
+  "python_tests_passed": 8,
+  "docker_python_tests_passed": 8,
+  "browser": {
+    "passed": true,
+    "realInference": true,
+    "inferenceRequests": 19,
+    "policyRecalculationUsesNoInference": true,
+    "viewports": [
+      1440,
+      390
+    ],
+    "checks": [
+      "four real signals",
+      "unchanged inference ID and answers after policy edits",
+      "routing/approval separation",
+      "guide example links",
+      "JSON export",
+      "16 real samples",
+      "policy metrics recomputed independently",
+      "Portuguese",
+      "mobile overflow",
+      "stale result invalidation"
+    ],
+    "errors": []
+  },
+  "metrics": {
+    "completed": 16,
+    "failed": 0,
+    "department_accuracy": 0.9375,
+    "rules_accuracy": 0.875,
+    "requested_action_accuracy": 0.75,
+    "churn_accuracy": 0.8125,
+    "urgency_mae": 0.5329562499999999,
+    "p50_ms": 222.78,
+    "p95_ms": 236.27,
+    "auto_route_candidates": 2,
+    "auto_route_coverage": 0.125,
+    "wrong_auto_routes": 0,
+    "auto_route_error_rate": 0,
+    "action_approval_rate": 0.3125
+  },
+  "policy_comparison": {
+    "conservative": {
+      "threshold": 0.8,
+      "completed": 16,
+      "eligible": 2,
+      "routing_review": 14,
+      "wrong_auto_routes": 0,
+      "error_rate_among_eligible": 0,
+      "action_approval": 5
+    },
+    "balanced": {
+      "threshold": 0.5,
+      "completed": 16,
+      "eligible": 2,
+      "routing_review": 14,
+      "wrong_auto_routes": 0,
+      "error_rate_among_eligible": 0,
+      "action_approval": 5
+    },
+    "exploratory": {
+      "threshold": 0.2,
+      "completed": 16,
+      "eligible": 10,
+      "routing_review": 6,
+      "wrong_auto_routes": 1,
+      "error_rate_among_eligible": 0.1,
+      "action_approval": 5
+    }
+  },
+  "no_truncation": true,
+  "no_cpu_fallback": true,
+  "docker_cpu_offline": {
+    "passed": true,
+    "checkpoints_tested": 2,
+    "evidence": "../docker-v2/offline-result.json"
+  },
+  "limits": [
+    "Synthetic visible teaching examples, not held-out data.",
+    "Thresholds and confidence are not calibrated.",
+    "No actual routing, refund, cancellation or customer contact.",
+    "Docker v2 checked with unit tests and network-isolated inference; full browser flow ran natively on Metal."
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "realInference": true,
+  "inferenceRequests": 19,
+  "policyRecalculationUsesNoInference": true,
+  "viewports": [
+    1440,
+    390
+  ],
+  "checks": [
+    "four real signals",
+    "unchanged inference ID and answers after policy edits",
+    "routing/approval separation",
+    "guide example links",
+    "JSON export",
+    "16 real samples",
+    "policy metrics recomputed independently",
+    "Portuguese",
+    "mobile overflow",
+    "stale result invalidation"
+  ],
+  "errors": []
+}
