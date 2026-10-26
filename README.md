@@ -22,6 +22,139 @@ PyTorch uses Metal (MPS) when available, otherwise CPU. To force CPU: `LAYA_LAB_
 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 bash start.command
 ```
 
+## How this project was created
+
+The starting point was the ticket-triage concept in George Michelon's Laya presentation. It was implemented as a standalone local application, independent of Archmazing. The first version asked three questions; the current version adds a requested-action question and separates routing from approval. No model was trained or fine-tuned to build this demo.
+
+The implementation followed these steps:
+
+1. Define the input contract in `questions.json`: department, urgency, cancellation intent and requested action, each with explicit criteria.
+2. Build a Python FastAPI service to load the checkpoints, validate input and call the real Laya SDK. Uvicorn serves the API and static files on localhost.
+3. Keep application policy in `domain.py`, separate from inference. This makes thresholds and approval rules inspectable and allows recalculation without another prediction.
+4. Build the interface in plain HTML, CSS and JavaScript. It uses `fetch` to call the API; there is no React, Next.js, frontend bundler or CDN dependency.
+5. Add synthetic examples and expected labels in `samples.json`, then test policy behavior with Python `unittest` and the real browser flow with Playwright. Expected labels are used only after inference for comparison.
+6. Add a native launcher, locked dependencies, Docker Compose, JSON exports, saved test evidence and a presentation guide.
+
+### Technologies and their roles
+
+| Component | Technology | Purpose |
+|---|---|---|
+| API and application policy | Python 3.11, FastAPI, Pydantic, Uvicorn | Validate requests, execute inference and apply rules |
+| Decision model | Laya SDK 0.4.15 | Return typed decisions from ticket text |
+| Model execution | PyTorch; Metal/MPS or CPU | Run the downloaded checkpoints locally |
+| Interface | HTML, CSS, JavaScript | Display predictions, policy traces and evaluation results |
+| Tests | Python unittest and Playwright | Check rules, API behavior and real desktop/mobile flows |
+| Optional packaging | Docker and Compose | Run an isolated CPU environment with persistent model storage |
+
+### Repository structure
+
+```text
+laya-decision-lab/
+├── app.py                  # FastAPI endpoints and real Laya inference
+├── domain.py               # Routing, priority, approval and keyword baseline
+├── questions.json          # Four typed questions sent to the model
+├── samples.json            # 16 synthetic examples and evaluation labels
+├── static/
+│   ├── index.html          # Interface and presenter guide
+│   ├── app.css             # Responsive layout
+│   └── app.js              # API calls, policy controls and evaluation UI
+├── tests/
+│   ├── test_lab.py         # Policy and API tests
+│   ├── browser.cjs         # Real-inference browser checks
+│   └── docker_offline.py   # Cached-model checks without network access
+├── evidence/               # Synthetic predictions, screenshots and reports
+├── requirements.txt        # Top-level dependency declarations
+├── requirements.lock.txt   # Exact Python versions used by the launcher
+├── package.json            # Optional browser-test dependencies only
+├── package-lock.json       # Locked browser-test dependencies
+├── start.command           # Native setup and server launcher
+├── Dockerfile              # CPU-only container image
+├── compose.yaml            # Local port, model volume and health check
+├── PRESENTATION.md         # Six-minute walkthrough and speaker notes
+└── README.md
+```
+
+`POST /api/analyze` runs Laya. `POST /api/policy` only reapplies deterministic rules. `GET /api/config` supplies questions, samples and presets; `GET /api/status` reports model loading/readiness. No database, external inference service or paid API key is required.
+
+## How Laya was installed and downloaded
+
+There are **two separate downloads**: the Python SDK and its dependencies, then the model weights. Installing the package alone does not download or run a checkpoint.
+
+### 1. Install the Python package
+
+The native launcher creates an isolated virtual environment and runs `pip install -r requirements.lock.txt`. That file pins `laya==0.4.15`, `torch==2.14.1`, FastAPI and the other tested dependencies. The smaller `requirements.txt` declares `laya[serve]==0.4.15` and HTTPX, but the launcher uses the exact lock file for reproducibility.
+
+The equivalent manual installation on macOS, from the cloned repository, is:
+
+```bash
+laya_venv="$HOME/Library/Application Support/LayaDecisionLab/venv"
+python3.11 -m venv --copies "$laya_venv"
+"$laya_venv/bin/python" -m pip install -r requirements.lock.txt
+"$laya_venv/bin/python" -m pip check
+```
+
+Normally, just use `bash start.command`; the manual commands explain the setup it performs. Its lock-file hash prevents reinstalling dependencies on every launch. Docker performs package installation inside the image and explicitly installs the official CPU-only PyTorch wheel before applying the lock file.
+
+### 2. Download the pretrained checkpoints
+
+The application uses the SDK's `laya.load(...)` call to fetch public files from Hugging Face. It does not clone the upstream Laya source repository, use a hosted inference endpoint or train a new model.
+
+| Setting | Value |
+|---|---|
+| Hugging Face repository | `convaiinnovations/laya` |
+| Pinned model revision | `55cf4c4ebb4ebe31b2550e8bdf3bd21b99753851` |
+| English checkpoint subfolder | `typed-decisions` |
+| Portuguese checkpoint subfolder | `multilingual` |
+| Native download/cache location | `.cache/huggingface` inside this project |
+| Docker cache location | `/models`, backed by the `laya-decision-lab_models` volume |
+| Authentication | Public downloads with `token=False`; no Hugging Face token required |
+
+The core loading and prediction calls below reproduce the integration used in `app.py`. Run this in the project's Python environment from the repository directory if you want to inspect the SDK directly; stop the demo first to avoid loading another model alongside it.
+
+```python
+import json
+import os
+from pathlib import Path
+
+os.environ["HF_HOME"] = str(Path.cwd() / ".cache" / "huggingface")
+os.environ["HF_HUB_DISABLE_IMPLICIT_TOKEN"] = "1"
+
+import laya
+import torch
+
+device = "mps" if torch.backends.mps.is_available() else "cpu"
+agent = laya.load(
+    "convaiinnovations/laya",
+    subfolder="typed-decisions",
+    revision="55cf4c4ebb4ebe31b2550e8bdf3bd21b99753851",
+    device=device,
+    token=False,
+)
+questions = json.loads(Path("questions.json").read_text())
+result = agent.predict(
+    "Please send a copy of my invoice. There is no rush.",
+    questions,
+    max_len=1024,
+    head_max_len=256,
+)
+print(json.dumps(result["answers"], indent=2))
+```
+
+For the Portuguese checkpoint, change `subfolder` to `"multilingual"` and use a Portuguese ticket. The application makes that selection automatically when a sample is chosen; custom input uses the checkpoint selected in the interface.
+
+On server startup, the demo preloads the English checkpoint in the background. The first Portuguese analysis loads/downloads the multilingual checkpoint. Later requests reuse cached files; only one model is resident at a time. Running **Evaluate samples → Run 16 samples** exercises both checkpoints.
+
+For the pinned revision, cached checkpoint files are located under:
+
+```text
+.cache/huggingface/hub/models--convaiinnovations--laya/
+└── snapshots/55cf4c4ebb4ebe31b2550e8bdf3bd21b99753851/
+    ├── typed-decisions/
+    └── multilingual/
+```
+
+These directories were verified in the local installation. The virtual environment, model weights, cache and runtime logs are excluded from Git. Someone cloning this repository downloads their own copy on first use. Installing dependencies and fetching weights require internet access initially; after that, the offline commands in this guide reuse the local cache. The Docker validation also ran both checkpoints in a container with `--network none`.
+
 ## How the demo works
 
 1. A ticket and the fixed questions in `questions.json` are sent to one local Laya SDK prediction call. Expected sample labels are never sent to the model.
@@ -48,6 +181,55 @@ The policy can only react to what the model predicts. A missed refund or cancell
 Conservative (80%), Balanced (50%) and Exploratory (20%) are **experimental presets**, not calibrated recommendations. The same threshold also flags uncertain priority/action predictions. Changing a preset or the slider calls `/api/policy` with the existing answers. It does not call Laya again; the prediction, inference ID and inference time stay unchanged. The original inference input and current policy threshold are exported separately.
 
 A refund can be eligible for automatic routing to Billing while still requiring human approval. High urgency can raise priority without making the team assignment uncertain.
+
+## The 16 demonstration examples
+
+Choose an example under **Start with an example**, then click **Analyze ticket**. The table shows **expected labels authored for evaluation**, not guaranteed model outputs. Complete ticket texts, urgency labels and cancellation labels are in [`samples.json`](samples.json). The newest eight examples broaden the original refund/outage-heavy set with routine, noisy, ambiguous and negated requests.
+
+| Example / ID | Language | What it illustrates | Expected team | Expected action |
+|---|---|---|---|---|
+| Duplicate charge (`duplicate`) | EN | Refund request with a conditional cancellation threat | Billing | `refund` |
+| Production outage (`outage`) | EN | Blocked work and an urgent technical request | Technical | `technical_help` |
+| A future purchase (`pricing`) | EN | Pre-purchase pricing without urgency | Sales | `sales_inquiry` |
+| The negation test (`negation`) | EN | Explicitly rejects cancellation and requests an invoice | Billing | `information` |
+| A small suggestion (`feedback`) | EN | Non-urgent product feedback | Other | `information` |
+| Leaving the service (`cancel`) | EN | Explicit cancellation before renewal | Billing | `cancellation` |
+| Duplicate charge in Portuguese (`pt-billing`) | PT | Portuguese refund request with a cancellation threat | Billing | `refund` |
+| A new team in Portuguese (`pt-pricing`) | PT | Portuguese pricing and plan inquiry | Sales | `sales_inquiry` |
+| Routine invoice copy (`invoice`) | EN | Routine information request, no account changes | Billing | `information` |
+| Getting started (`howto`) | EN | Request for a user guide; nothing is broken | Other | `information` |
+| Login with typos (`typo`) | EN | Misspellings in an urgent login issue | Technical | `technical_help` |
+| Not enough context (`ambiguous`) | EN | Insufficient detail to determine the requested action | Other | `unclear` |
+| Two competing requests (`multiple`) | EN | Requests both a refund and cancellation | Billing | `unclear` |
+| Routine invoice in Portuguese (`pt-invoice`) | PT | Explicitly rejects cancellation and refund in Portuguese | Billing | `information` |
+| No technical keywords (`paraphrase`) | EN | Describes a failure without the baseline keywords | Technical | `technical_help` |
+| Refund explicitly declined (`negated-refund`) | EN | Rejects a refund and requests only a receipt | Billing | `information` |
+
+### Three examples to explain live
+
+**Routine invoice copy**
+
+> Please send me a copy of my invoice for September. No changes to my subscription are needed and there is no rush.
+
+Expected: Billing, low urgency, no cancellation intent and an information request. In the recorded run, the model identified the team and action but its urgency score led the policy to propose Medium priority. Change 80% to 20% to show how the same department prediction becomes eligible for routing; changing the threshold does not improve the prediction itself.
+
+**Duplicate charge**
+
+> I was charged twice for March. Please refund the duplicate payment today, or I will cancel my subscription.
+
+Expected: Billing, high urgency, a cancellation signal and a refund request. The action question distinguishes the immediate refund request from the conditional cancellation threat. Even when routing is eligible at 20%, a predicted refund still requires human approval.
+
+**Routine invoice in Portuguese**
+
+> Pode enviar uma cópia da minha fatura de setembro? Não quero cancelar nem pedir estorno. Não tenho urgência.
+
+Expected: Billing, low urgency, no cancellation intent and an information request. In the recorded run the model incorrectly predicted cancellation. Show this example to explain why a correct department and a typed response do not guarantee a correct action.
+
+### Recorded outcomes and policy trade-offs
+
+The final native Metal run on October 26, 2026 completed all 16 requests: **15/16 department labels matched**, compared with **14/16 for keyword rules**; **12/16 requested-action labels matched**. With either the 80% or 50% routing threshold, 2/16 tickets were eligible and neither eligible team was wrong. At 20%, 10/16 were eligible, including one wrong team assignment. Five predicted actions required approval under all three policies; that count includes an incorrect cancellation prediction.
+
+These are visible synthetic examples, not a held-out benchmark or evidence of general superiority. Read [the full results](evidence/presentation-v2/evaluation.json) and [the presentation walkthrough](PRESENTATION.md) to explain both the capabilities and the errors.
 
 ## Evaluate the trade-offs
 
