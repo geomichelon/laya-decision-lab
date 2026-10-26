@@ -24,7 +24,7 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 bash start.command
 
 ## How this project was created
 
-The starting point was the ticket-triage concept in George Michelon's Laya presentation. It was implemented as a standalone local application, independent of Archmazing. The first version asked three questions; the current version adds a requested-action question and separates routing from approval. No model was trained or fine-tuned to build this demo.
+This standalone application was created for a technical presentation on evaluating Laya for support-ticket triage in a company setting. The first version asked three questions; the current version adds a requested-action question and separates routing from approval. No model was trained or fine-tuned to build this demo.
 
 The implementation followed these steps:
 

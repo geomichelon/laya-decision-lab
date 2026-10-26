@@ -98,7 +98,7 @@ The upstream project documents typed choice, score and yes/no decisions. This de
 - Use **Present** for fullscreen. Keep the local server terminal open.
 - Keep the policy at 80% at the beginning, then deliberately change it to 20% to explain the trade-off.
 - Show at least one model error and clarify that all tickets are synthetic.
-- Keep the original PDF as the introduction. This application adds real inference and a separate operational policy; it does not establish the production claims a pilot would need to test.
+- Use the presentation slides as the introduction. This application adds real inference and a separate operational policy; it does not establish the production claims a pilot would need to test.
 
 ## Recorded policy comparison — October 26, 2026
 
